@@ -21,7 +21,7 @@ class ImgArea(BaseModel):
     width: int = None
     height: int = None
 
-class ImgAewWithLevel(ImgArea):
+class ImgAreaWithLevel(ImgArea):
     level: int
 
 class ImgOilPainting(BaseModel):
