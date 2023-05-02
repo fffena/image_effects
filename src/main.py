@@ -38,7 +38,7 @@ def resize(d: model.ImgSize):
     img = imp.b64_to_cv2_img(d.img)
     if isinstance(img, JSONResponse):
         return img
-    if d.aspect_ratio:
+    if d.keep_aspect_ratio:
         height, width = img.shape[:2]
         after_height = int(d.width / width * height)
     else:

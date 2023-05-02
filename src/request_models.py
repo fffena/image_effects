@@ -12,7 +12,7 @@ class ImgSize(BaseModel):
     img: str
     width: int = None
     height: int = None
-    aspect_ratio: bool = Field(True, alias="aspect-ratio")
+    keep_aspect_ratio: bool = Field(True, alias="keep-aspect-ratio")
 
 class ImgArea(BaseModel):
     img: str
