@@ -1,7 +1,6 @@
 import cv2
-import uvicorn
 import numpy as np
-
+import uvicorn
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse, JSONResponse
 
@@ -10,9 +9,11 @@ import request_models as model
 
 app = FastAPI()
 
+
 @app.get("/", response_class=HTMLResponse)
 def web_app():
     return "<h1>Test</h1>"
+
 
 @app.post("/api/grayscale")
 def grayscale(img: model.ImgData):
@@ -21,6 +22,7 @@ def grayscale(img: model.ImgData):
         return img
     result_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     return imp.img_to_b64(result_img)
+
 
 @app.post("/api/noise")
 def noise(d: model.ImgNoiseData):
@@ -32,6 +34,7 @@ def noise(d: model.ImgNoiseData):
     noise = np.random.randint(0, d.level, img.shape[:2])
     filtered_img = img + noise
     return imp.img_to_b64(filtered_img)
+
 
 @app.post("/api/resize")
 def resize(d: model.ImgSize):
@@ -46,12 +49,14 @@ def resize(d: model.ImgSize):
     result_img = cv2.resize(img, (d.width, after_height))
     return imp.img_to_b64(result_img)
 
+
 @app.post("/api/crop")
 def crop(d: model.ImgArea):
     img = imp.b64_to_cv2_img(d.img)
     if isinstance(img, JSONResponse):
         return img
     return imp.img_to_b64(imp.crop(img, d.x, d.y, d.width, d.height))
+
 
 @app.post("/api/mosaic")
 def mosaic(d: model.ImgAreaWithLevel):
@@ -60,6 +65,7 @@ def mosaic(d: model.ImgAreaWithLevel):
         return img
     result = imp.mosaic(img, d.level, d.x, d.y, d.width, d.height)
     return imp.img_to_b64(result)
+
 
 @app.post("/api/blur")
 def blur(d: model.ImgAreaWithLevel):
@@ -92,8 +98,9 @@ def test(img: model.TestData):
     print(base)
     print(img.test_bool)
     decoded_img = imp.b64_to_cv2_img(base)
-    result_img =  cv2.cvtColor(decoded_img, cv2.COLOR_BGR2GRAY)
+    result_img = cv2.cvtColor(decoded_img, cv2.COLOR_BGR2GRAY)
     return imp.img_to_b64(result_img)
+
 
 if __name__ == "__main__":
     # web.run(app)
