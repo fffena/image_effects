@@ -48,7 +48,10 @@ def resize(d: model.ImgSize):
 
 @app.post("/api/crop")
 def crop(d: model.ImgArea):
-    pass
+    img = imp.b64_to_cv2_img(d.img)
+    if isinstance(img, JSONResponse):
+        return img
+    return imp.img_to_b64(imp.crop(img, d.x, d.y, d.width, d.height))
 
 @app.post("/api/mosaic")
 def mosaic(d: model.ImgAreaWithLevel):
