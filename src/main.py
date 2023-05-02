@@ -51,7 +51,7 @@ def crop(d: model.ImgArea):
     pass
 
 @app.post("/api/mosaic")
-def mosaic(d: model.ImgArea):
+def mosaic(d: model.ImgAreaWithLevel):
     img = imp.b64_to_cv2_img(d.img)
     if isinstance(img, JSONResponse):
         return img
@@ -59,7 +59,7 @@ def mosaic(d: model.ImgArea):
     return imp.img_to_b64(result)
 
 @app.post("/api/blur")
-def blur(d: model.ImgArea):
+def blur(d: model.ImgAreaWithLevel):
     img = imp.b64_to_cv2_img(d.img)
     if isinstance(img, JSONResponse):
         return img
