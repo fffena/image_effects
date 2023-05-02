@@ -8,18 +8,20 @@ class ImgNoiseData(BaseModel):
     convert_grayscale: bool = Field(False, alias="convert-grayscale")
     level: int = 100
 
-class ImgSizeSelectData(BaseModel):
+class ImgSize(BaseModel):
     img: str
     width: int = None
     height: int = None
     aspect_ratio: bool = Field(True, alias="aspect-ratio")
 
-class ImgAreaSelect(BaseModel):
+class ImgArea(BaseModel):
     img: str
     x: int = None
     y: int = None
     width: int = None
     height: int = None
+
+class ImgAewWithLevel(ImgArea):
     level: int
 
 class ImgOilPainting(BaseModel):

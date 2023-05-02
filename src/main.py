@@ -34,7 +34,7 @@ def noise(d: model.ImgNoiseData):
     return imp.img_to_b64(filtered_img)
 
 @app.post("/api/resize")
-def resize(d: model.ImgSizeSelectData):
+def resize(d: model.ImgSize):
     img = imp.b64_to_cv2_img(d.img)
     if isinstance(img, JSONResponse):
         return img
@@ -47,11 +47,11 @@ def resize(d: model.ImgSizeSelectData):
     return imp.img_to_b64(result_img)
 
 @app.post("/api/crop")
-def crop(d: model.ImgAreaSelect):
+def crop(d: model.ImgArea):
     pass
 
 @app.post("/api/mosaic")
-def mosaic(d: model.ImgAreaSelect):
+def mosaic(d: model.ImgArea):
     img = imp.b64_to_cv2_img(d.img)
     if isinstance(img, JSONResponse):
         return img
@@ -59,7 +59,7 @@ def mosaic(d: model.ImgAreaSelect):
     return imp.img_to_b64(result)
 
 @app.post("/api/blur")
-def blur(d: model.ImgAreaSelect):
+def blur(d: model.ImgArea):
     img = imp.b64_to_cv2_img(d.img)
     if isinstance(img, JSONResponse):
         return img
