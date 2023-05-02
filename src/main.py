@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 import uvicorn
+import binascii
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse, JSONResponse
 
@@ -9,6 +10,15 @@ import request_models as model
 
 app = FastAPI()
 
+@app.middleware("http")
+async def add_exception_handling(request, call_next):
+    try:
+        response = await call_next(request)
+    except (binascii.Error, cv2.error):
+        return JSONResponse({"msg": "base64 decode failed"}, 400)
+    except Exception as e:
+        return JSONResponse({"msg": "Internal server Error.", "error_msg": str(e)}, 500)
+    return response
 
 @app.get("/", response_class=HTMLResponse)
 def web_app():
@@ -18,8 +28,6 @@ def web_app():
 @app.post("/api/grayscale")
 def grayscale(img: model.ImgData):
     img = imp.b64_to_cv2_img(img.img)
-    if isinstance(img, JSONResponse):
-        return img
     result_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     return imp.img_to_b64(result_img)
 
@@ -27,8 +35,6 @@ def grayscale(img: model.ImgData):
 @app.post("/api/noise")
 def noise(d: model.ImgNoiseData):
     img = imp.b64_to_cv2_img(d.img)
-    if isinstance(img, JSONResponse):
-        return img
     if d.convert_grayscale:
         img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     noise = np.random.randint(0, d.level, img.shape[:2])
@@ -39,8 +45,6 @@ def noise(d: model.ImgNoiseData):
 @app.post("/api/resize")
 def resize(d: model.ImgSize):
     img = imp.b64_to_cv2_img(d.img)
-    if isinstance(img, JSONResponse):
-        return img
     if d.keep_aspect_ratio:
         height, width = img.shape[:2]
         after_height = int(d.width / width * height)
@@ -53,16 +57,12 @@ def resize(d: model.ImgSize):
 @app.post("/api/crop")
 def crop(d: model.ImgArea):
     img = imp.b64_to_cv2_img(d.img)
-    if isinstance(img, JSONResponse):
-        return img
     return imp.img_to_b64(imp.crop(img, d.x, d.y, d.width, d.height))
 
 
 @app.post("/api/mosaic")
 def mosaic(d: model.ImgAreaWithLevel):
     img = imp.b64_to_cv2_img(d.img)
-    if isinstance(img, JSONResponse):
-        return img
     result = imp.mosaic(img, d.level, d.x, d.y, d.width, d.height)
     return imp.img_to_b64(result)
 
@@ -70,8 +70,6 @@ def mosaic(d: model.ImgAreaWithLevel):
 @app.post("/api/blur")
 def blur(d: model.ImgAreaWithLevel):
     img = imp.b64_to_cv2_img(d.img)
-    if isinstance(img, JSONResponse):
-        return img
     result = imp.blur(img, d.level, d.x, d.y, d.width, d.height)
     return imp.img_to_b64(result)
 
@@ -79,8 +77,6 @@ def blur(d: model.ImgAreaWithLevel):
 @app.post("/api/oilpainting")
 def oilpainting(data: model.ImgOilPainting):
     img = imp.b64_to_cv2_img(data.img)
-    if isinstance(img, JSONResponse):
-        return img
     return imp.img_to_b64(imp.oilpainting(img, data.size, data.ratio))
 
 

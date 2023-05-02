@@ -10,11 +10,7 @@ def b64_to_cv2_img(data: str):
     data = data.replace("-", "+").replace("_", "/")
     if "," in data:
         data = data.split(",")[1]
-    try:
-        decoded_bytes = base64.b64decode(data)
-    except:
-        msg = {"msg": "base64のデコードでエラーが発生しました"}
-        return JSONResponse(msg, status_code=400)
+    decoded_bytes = base64.b64decode(data)
     ndarray = np.frombuffer(decoded_bytes, np.uint8)
     img = cv2.imdecode(ndarray, cv2.IMREAD_COLOR)
     return img
