@@ -92,6 +92,7 @@ def oilpainting(img, size, dynRatio):
 
 
 def detect_eye(img):
+    # TODO: カスケード分類器は精度が悪いため、dlibに変更する
     gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     cascade = cv2.CascadeClassifier(
         pathjoin(cv2.data.haarcascades, "haarcascade_eye.xml")
