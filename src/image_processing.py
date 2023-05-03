@@ -3,7 +3,6 @@ import cv2
 from os.path import join as pathjoin
 import numpy as np
 from uuid import uuid4
-from fastapi.responses import JSONResponse
 
 
 def b64_to_cv2_img(data: str):
