@@ -1,7 +1,8 @@
+import binascii
+
 import cv2
 import numpy as np
 import uvicorn
-import binascii
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse, JSONResponse
 
@@ -9,6 +10,7 @@ import image_processing as imp
 import request_models as model
 
 app = FastAPI()
+
 
 @app.middleware("http")
 async def add_exception_handling(request, call_next):
@@ -19,6 +21,7 @@ async def add_exception_handling(request, call_next):
     except Exception as e:
         return JSONResponse({"msg": "Internal server Error.", "error_msg": str(e)}, 500)
     return response
+
 
 @app.get("/", response_class=HTMLResponse)
 def web_app():
@@ -80,13 +83,16 @@ def oilpainting(data: model.ImgOilPainting):
     return imp.img_to_b64(imp.oilpainting(img, data.size, data.ratio))
 
 
-# ------------ Deep Learning --------------
+# ------------ Deep Learning ----------
+
 @app.post("/api/detection/eye")
 def detection_eye(data: model.ImgData):
     img = imp.b64_to_cv2_img(data.img)
     result = imp.detect_eye(img)
     return imp.img_to_b64(result)
-# ---------------- end ----------------
+
+# -------------------------------------
+
 
 @app.post("/api/test")
 def test(img: model.TestData):

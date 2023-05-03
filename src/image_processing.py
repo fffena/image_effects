@@ -1,8 +1,9 @@
 import base64
-import cv2
 from os.path import join as pathjoin
-import numpy as np
 from uuid import uuid4
+
+import cv2
+import numpy as np
 
 
 def b64_to_cv2_img(data: str):
@@ -22,6 +23,7 @@ def img_to_b64(data: str):
     ret, dst = cv2.imencode(".jpg", data)
     return base64.b64encode(dst).decode("utf-8", "strict")
 
+
 def crop(img, x, y, width, height):
     # はみ出すとエラーが出るのでいい感じに収める
     tx = min(x + width, img.shape[1])
@@ -31,39 +33,49 @@ def crop(img, x, y, width, height):
 
     return img[y:ty, x:tx]
 
+
 def replace_img(img, new, x, y):
     width, height = new.shape[:2][::-1]
     result = img.copy()
-    result[y:y + height, x:x + width] = new
+    result[y : y + height, x : x + width] = new
     return result
 
 
-
-def mosaic(img, ratio: int | float = None,
-           x: int = None, y: int = None,
-           width: int = None, height: int = None):
-
+def mosaic(
+    img,
+    ratio: int | float = None,
+    x: int = None,
+    y: int = None,
+    width: int = None,
+    height: int = None,
+):
     if isinstance(ratio, float) and ratio > 1.0:
         ratio = 1.0
     elif isinstance(ratio, int):
         ratio = ratio / 100
     area = (x, y, width, height)
     if any([i is None for i in area]):
-        result = cv2.resize(img, None, fx=ratio, fy=ratio, interpolation=cv2.INTER_NEAREST)
-        result = cv2.resize(result, img.shape[:2][::-1], interpolation=cv2.INTER_NEAREST)
+        result = cv2.resize(
+            img, None, fx=ratio, fy=ratio, interpolation=cv2.INTER_NEAREST
+        )
+        result = cv2.resize(
+            result, img.shape[:2][::-1], interpolation=cv2.INTER_NEAREST
+        )
     else:
         result = img.copy()
         trimming_area = crop(result, x, y, width, height)
         size = trimming_area.shape[:2][::-1]
-        filtered_area = cv2.resize(trimming_area, None, fx=ratio, fy=ratio, interpolation=cv2.INTER_NEAREST)
+        filtered_area = cv2.resize(
+            trimming_area, None, fx=ratio, fy=ratio, interpolation=cv2.INTER_NEAREST
+        )
         filtered_area = cv2.resize(filtered_area, size, interpolation=cv2.INTER_NEAREST)
         result = replace_img(result, filtered_area, x, y)
     return result
 
-def blur(img, radius,
-         x: int = None, y: int = None,
-         width: int = None, height: int = None):
 
+def blur(
+    img, radius, x: int = None, y: int = None, width: int = None, height: int = None
+):
     area = (x, y, width, height)
     radius = (radius, radius)
     if any([i is None for i in area]):
@@ -74,15 +86,19 @@ def blur(img, radius,
         filtered = cv2.blur(cropped_area, radius)
         return replace_img(img, filtered, size[0], size[1])
 
+
 def oilpainting(img, size, dynRatio):
     result = cv2.xphoto.oilPainting(img, size=size, dynRatio=dynRatio)
     return result
 
+
 def detect_eye(img):
     gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    cascade = cv2.CascadeClassifier(pathjoin(cv2.data.haarcascades, "haarcascade_eye.xml"))
+    cascade = cv2.CascadeClassifier(
+        pathjoin(cv2.data.haarcascades, "haarcascade_eye.xml")
+    )
 
     eye = cascade.detectMultiScale(gray_img)
-    for (ex, ey, ew, eh) in eye:
+    for ex, ey, ew, eh in eye:
         cv2.rectangle(img, (ex, ey), (ex + ew, ey + eh), (0, 255, 0), 2)
     return img
