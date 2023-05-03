@@ -43,7 +43,7 @@ def replace_img(img, new, x, y):
 
 def mosaic(
     img,
-    ratio: int | float = None,
+    ratio: int | float = 0.5,
     x: int = None,
     y: int = None,
     width: int = None,
