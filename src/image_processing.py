@@ -16,7 +16,7 @@ def b64_to_cv2_img(data: str):
     return img
 
 
-def img_to_b64(data: str):
+def img_to_b64(data):
     cv2.imwrite(f"out_img/{uuid4()}.jpg", data)  # test
 
     ret, dst = cv2.imencode(".jpg", data)
