@@ -106,4 +106,5 @@ def test(img: model.TestData):
 
 if __name__ == "__main__":
     # web.run(app)
-    uvicorn.run(app, host="0.0.0.0")
+    DEBUG = True
+    uvicorn.run("main:app", host="0.0.0.0", reload=DEBUG)
