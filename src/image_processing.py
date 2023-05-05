@@ -23,7 +23,7 @@ def img_to_b64(data: str):
     return base64.b64encode(dst).decode("utf-8", "strict")
 
 
-def crop(img, x, y, width, height):
+def crop(img, x: int, y: int, width: int, height: int):
     # はみ出すとエラーが出るのでいい感じに収める
     tx = min(x + width, img.shape[1])
     ty = min(y + height, img.shape[0])
@@ -33,7 +33,7 @@ def crop(img, x, y, width, height):
     return img[y:ty, x:tx]
 
 
-def replace_img(img, new, x, y):
+def replace_img(img, new, x: int, y: int):
     width, height = new.shape[:2][::-1]
     result = img.copy()
     result[y : y + height, x : x + width] = new
@@ -73,7 +73,12 @@ def mosaic(
 
 
 def blur(
-    img, radius, x: int = None, y: int = None, width: int = None, height: int = None
+    img,
+    radius: int,
+    x: int = None,
+    y: int = None,
+    width: int = None,
+    height: int = None,
 ):
     area = (x, y, width, height)
     radius = (radius, radius)
@@ -86,7 +91,7 @@ def blur(
         return replace_img(img, filtered, size[0], size[1])
 
 
-def oilpainting(img, size, dynRatio):
+def oilpainting(img, size: int, dynRatio: int):
     result = cv2.xphoto.oilPainting(img, size=size, dynRatio=dynRatio)
     return result
 
