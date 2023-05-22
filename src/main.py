@@ -151,7 +151,6 @@ def detection_eye(data: model.Detection):
                         img, 0.2, x, y, width, height
                     )
                 else:
-                    print("he")
                     result = types[data.return_type.value](
                         result, 0.2, x, y, width, height
                     )
