@@ -1,0 +1,2 @@
+class NoFaceDetected(Exception):
+    pass
