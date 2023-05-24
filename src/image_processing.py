@@ -181,13 +181,3 @@ def detect_eye(img, start_level: int = 0, mark: bool = False):
         return img
     else:
         return tuple(eyes)
-    # TODO: カスケード分類器は精度が悪いため、dlibに変更する
-    # gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    # cascade = cv2.CascadeClassifier(
-    #     pathjoin(cv2.data.haarcascades, "haarcascade_eye.xml")
-    # )
-
-    # eye = cascade.detectMultiScale(gray_img)
-    # for ex, ey, ew, eh in eye:
-    #     cv2.rectangle(img, (ex, ey), (ex + ew, ey + eh), (0, 255, 0), 2)
-    # return img
