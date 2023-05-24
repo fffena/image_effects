@@ -1,4 +1,5 @@
 env/
 __pycache__/
 out_img/
-.python-version
+.spaceignore
+.space
