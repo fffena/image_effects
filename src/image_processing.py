@@ -3,10 +3,6 @@ from enum import IntEnum
 
 import cv2
 import numpy as np
-import dlib
-from imutils import face_utils
-
-import exceptions
 
 
 def b64_to_cv2_img(data: str):
@@ -128,56 +124,3 @@ def rotate(img, angle, center=None):
 def oilpainting(img, size, dynRatio):
     result = cv2.xphoto.oilPainting(img, size=size, dynRatio=dynRatio)
     return result
-
-
-def eye(landmarks, side):
-    landmarks = face_utils.shape_to_np(landmarks)
-    if side == "left":
-        eye_left = 36
-        eye_right = 39
-        eye_top = 38
-        eye_bottom = 41
-    elif side == "right":
-        eye_left = 42
-        eye_right = 45
-        eye_top = 43
-        eye_bottom = 46
-    else:
-        raise ValueError("left or right")
-
-    left_x = landmarks[eye_left][0]
-    right_x = landmarks[eye_right][0]
-    eye_width_half = (right_x - left_x) // 2
-
-    top_y = landmarks[eye_top][1]
-    bottom_y = landmarks[eye_bottom][1]
-
-    top_left = (left_x - eye_width_half, top_y - eye_width_half)
-    bottom_right = (right_x + eye_width_half, bottom_y + eye_width_half)
-    return top_left, bottom_right
-
-
-def detect_eye(img, start_level: int = 0, mark: bool = False):
-    face_detector = dlib.get_frontal_face_detector()
-    for i in range(start_level, start_level + 3):
-        faces = face_detector(img, i)
-        if faces:
-            break
-    else:
-        raise exceptions.NoFaceDetected("No Face Detected")
-    predictor = dlib.shape_predictor("data/shape_predictor_68_face_landmarks.dat")  # NOQA
-    eyes = []
-    for face in faces:
-        left_eye = eye(predictor(img, face), "left")
-        right_eye = eye(predictor(img, face), "right")
-        coordinate = (left_eye, right_eye)
-
-        if mark:
-            cv2.rectangle(img, left_eye[0], left_eye[1], (0, 255, 0), 2)
-            cv2.rectangle(img, right_eye[0], right_eye[1], (0, 255, 0), 2)
-        else:
-            eyes.append(coordinate)
-    if mark:
-        return img
-    else:
-        return tuple(eyes)
