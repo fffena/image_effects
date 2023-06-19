@@ -1,6 +1,5 @@
 import binascii
 import traceback
-from multiprocessing import Pool, TimeoutError
 from time import time
 
 import cv2
@@ -13,7 +12,9 @@ from fastapi.templating import Jinja2Templates
 
 import image_processing as imp
 import request_models as model
+import insightface_utils as inu
 from exceptions import NoFaceDetected
+
 
 app = FastAPI()
 templates = Jinja2Templates(directory="./templates")
@@ -30,6 +31,10 @@ async def add_exception_handling(request, call_next):
             raise e
         else:
             response = JSONResponse({"msg": "base64 decode failed"}, 400)
+    except NoFaceDetected:
+        response = JSONResponse({"msg": "not face detected"}, 400)
+    # except Exception as e:
+    #     response = JSONResponse({"msg": "internal server error!!", 500})
     response.headers["X-Process-Time"] = str(round(time() - start, 3))
     return response
 
@@ -130,34 +135,20 @@ def detection_eye(data: model.Detection):
 
     img = imp.b64_to_cv2_img(data.img)
     mark = True if data.return_type.value == "mark" else False
-    try:
-        with Pool(processes=1) as p:
-            apply_result = p.apply_async(imp.detect_eye, (img, data.start_level, mark))
-            result = apply_result.get(timeout=20)
-    except NoFaceDetected:
-        return {"msg": "No Face detected"}
-    except TimeoutError:
-        return {"msg": "timeouted"}
-    if not mark:
-        types = {"mosaic": imp.mosaic, "blur": imp.blur}
-        for eyes in result:
-            for eye in eyes:
-                x = eye[0][0]
-                y = eye[0][1]
-                width = eye[1][0] - x
-                height = eye[1][1] - y
-                if isinstance(result, tuple):
-                    result = types[data.return_type.value](
-                        img, 0.2, x, y, width, height
-                    )
-                else:
-                    result = types[data.return_type.value](
-                        result, 0.2, x, y, width, height
-                    )
-
+    for i in inu.detect_face(img):
+        if mark:
+            result = i.left_eye.draw_frame(img)
+            result = i.right_eye.draw_frame(img)
     return imp.img_to_b64(result)
 
-
+@app.post("/api/detection/landmark")
+def landmark(d: model.Detection):
+    img = imp.b64_to_cv2_img(d.img)
+    faces = inu.detect_face(img)
+    for i in faces:
+        result = i.draw_face_frame(img)
+        result = i.draw_all_landmark(img, text=True)
+    return imp.img_to_b64(result)
 # -------------------------------------
 
 
