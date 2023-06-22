@@ -8,6 +8,7 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.requests import Request
 from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 import image_processing as imp
@@ -17,7 +18,15 @@ from exceptions import NoFaceDetected
 
 
 app = FastAPI()
+app.mount("/demo", StaticFiles(directory="templates/demo", html=True), name="demo")
 templates = Jinja2Templates(directory="./templates")
+
+
+face_d = inu.FaceDetector(
+    name=inu.Models.LITE,
+    allowed_modules=[inu.Modules.DETECTION, inu.Modules.LANDMARK_2D],
+    providers=["CPUExecutionProvider"])
+face_d.prepare()
 
 
 @app.middleware("http")
@@ -98,7 +107,7 @@ def blur(d: model.ImgAreaWithLevel):
 def flip(d: model.ImgFlip):
     img = imp.b64_to_cv2_img(d.img)
     flip_modes = [i for i in imp.Flip.__members__.items()]
-    flip_value = list(filter(lambda x: x[0].lower() == d.mode.value, flip_modes))[0][1]
+    flip_value = list(filter(lambda x: x[0].lower() == d.mode.value, flip_modes))[0][1]  # NOQA
 
     result = imp.flip(img, flip_value)
     return imp.img_to_b64(result)
@@ -124,30 +133,25 @@ def oilpainting(data: model.ImgOilPainting):
 
 @app.post("/api/detection/eye")
 def detection_eye(data: model.Detection):
-    if data.img:
-        image = True
-        video = False
-    elif data.video:
-        image = False
-        video = True
-    else:
-        return {"msg": "どっちか入れて"}
-
     img = imp.b64_to_cv2_img(data.img)
-    mark = True if data.return_type.value == "mark" else False
-    for i in inu.detect_face(img):
+    mark = data.return_type.value == "mark"
+    for i in face_d.detect(img):
         if mark:
             result = i.left_eye.draw_frame(img)
             result = i.right_eye.draw_frame(img)
+        else:
+            TYPES = {"mosaic": imp.mosaic, "blur": imp.blur}
+            result = TYPES[data.return_type](img, "")
     return imp.img_to_b64(result)
+
 
 @app.post("/api/detection/landmark")
 def landmark(d: model.Detection):
     img = imp.b64_to_cv2_img(d.img)
-    faces = inu.detect_face(img)
+    faces = face_d.detect(img)
     for i in faces:
         result = i.draw_face_frame(img)
-        result = i.draw_all_landmark(img, text=True)
+        result = i.draw_all_landmarks(img, text=True)
     return imp.img_to_b64(result)
 # -------------------------------------
 
